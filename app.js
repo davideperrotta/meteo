@@ -124,7 +124,7 @@ function createProvinceCard(province) {
 
 // Handle Province Click - naviga alla schermata di dettaglio
 function handleProvinceClick(province) {
-    window.location.href = `/detail.html?province=${encodeURIComponent(province.name)}`;
+    window.location.href = `detail.html?province=${encodeURIComponent(province.name)}`;
 }
 
 // Utility: Format Temperature

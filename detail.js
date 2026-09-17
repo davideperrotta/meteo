@@ -6,7 +6,7 @@ const backBtn = document.getElementById('backBtn');
 
 document.addEventListener('DOMContentLoaded', () => {
     backBtn.addEventListener('click', () => {
-        window.location.href = '/index.html';
+        window.location.href = 'index.html';
     });
     loadCityDetail();
 });
@@ -21,7 +21,7 @@ async function loadCityDetail() {
     const provinceName = getProvinceName();
 
     if (!provinceName) {
-        window.location.href = '/index.html';
+        window.location.href = 'index.html';
         return;
     }
 
