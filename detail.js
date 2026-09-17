@@ -3,24 +3,42 @@ const loadingSpinner = document.getElementById('loadingSpinner');
 const errorMessage = document.getElementById('errorMessage');
 const detailContent = document.getElementById('detailContent');
 const backBtn = document.getElementById('backBtn');
+const comuneSearchInput = document.getElementById('comuneSearchInput');
+const comuneSearchResults = document.getElementById('comuneSearchResults');
 
 document.addEventListener('DOMContentLoaded', () => {
     backBtn.addEventListener('click', () => {
         window.location.href = 'index.html';
     });
+    setupComuneSearch();
     loadCityDetail();
 });
 
-// Get province name from query string
-function getProvinceName() {
+// Legge la località da mostrare dalla query string.
+// Supporta sia il vecchio formato (?province=Nome) sia lat/lon diretti (?name=&region=&lat=&lon=),
+// usati per i comuni trovati tramite la ricerca.
+function getLocationFromQuery() {
     const params = new URLSearchParams(window.location.search);
-    return params.get('province');
+    const lat = parseFloat(params.get('lat'));
+    const lon = parseFloat(params.get('lon'));
+
+    if (!Number.isNaN(lat) && !Number.isNaN(lon) && params.get('name')) {
+        return {
+            name: params.get('name'),
+            region: params.get('region') || '',
+            lat,
+            lon
+        };
+    }
+
+    const provinceName = params.get('province');
+    return provinceName ? { province: provinceName } : null;
 }
 
 async function loadCityDetail() {
-    const provinceName = getProvinceName();
+    const location = getLocationFromQuery();
 
-    if (!provinceName) {
+    if (!location) {
         window.location.href = 'index.html';
         return;
     }
@@ -33,7 +51,9 @@ async function loadCityDetail() {
         // Su schermi desktop mostriamo una fascia oraria più lunga
         const hours = window.innerWidth >= 900 ? 24 : 6;
 
-        const data = await fetchProvinceDetail(provinceName, hours);
+        const data = location.province
+            ? await fetchProvinceDetail(location.province, hours)
+            : await fetchLocationDetail(location, hours);
 
         loadingSpinner.style.display = 'none';
         renderDetail(data);
@@ -42,6 +62,82 @@ async function loadCityDetail() {
         loadingSpinner.style.display = 'none';
         errorMessage.style.display = 'block';
     }
+}
+
+// Configura la barra di ricerca dei comuni, con debounce sulle chiamate alla geocoding API
+function setupComuneSearch() {
+    let debounceTimer = null;
+    let requestId = 0;
+
+    comuneSearchInput.addEventListener('input', (e) => {
+        const term = e.target.value;
+        clearTimeout(debounceTimer);
+
+        if (term.trim().length < 2) {
+            hideComuneResults();
+            return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+            const currentRequestId = ++requestId;
+            try {
+                const results = await searchComuni(term);
+                // Ignora risposte arrivate in ritardo rispetto a una ricerca più recente
+                if (currentRequestId !== requestId) return;
+                renderComuneResults(results);
+            } catch (error) {
+                console.error('Errore nella ricerca comuni:', error);
+                if (currentRequestId === requestId) hideComuneResults();
+            }
+        }, 350);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.comune-search-container')) {
+            hideComuneResults();
+        }
+    });
+}
+
+function hideComuneResults() {
+    comuneSearchResults.style.display = 'none';
+    comuneSearchResults.innerHTML = '';
+}
+
+function renderComuneResults(results) {
+    comuneSearchResults.innerHTML = '';
+
+    if (results.length === 0) {
+        comuneSearchResults.innerHTML = '<div class="comune-search-message">Nessun comune trovato.</div>';
+        comuneSearchResults.style.display = 'block';
+        return;
+    }
+
+    results.forEach((result) => {
+        const item = document.createElement('div');
+        item.className = 'comune-result-item';
+        const subtitle = [result.province, result.region].filter(Boolean).join(' · ');
+        item.innerHTML = `
+            <div class="comune-result-name">${result.name}</div>
+            <div class="comune-result-region">${subtitle}</div>
+        `;
+        item.addEventListener('click', () => selectComune(result));
+        comuneSearchResults.appendChild(item);
+    });
+
+    comuneSearchResults.style.display = 'block';
+}
+
+// Naviga verso il dettaglio del comune selezionato aggiornando la query string
+function selectComune(result) {
+    const params = new URLSearchParams({
+        name: result.name,
+        region: result.region || result.province || '',
+        lat: result.lat,
+        lon: result.lon
+    });
+
+    window.location.href = `detail.html?${params.toString()}`;
 }
 
 function renderDetail(data) {

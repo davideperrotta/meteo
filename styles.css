@@ -91,6 +91,57 @@ html, body {
     pointer-events: none;
 }
 
+/* Comune Search (pagina di dettaglio) */
+.comune-search-container {
+    margin-bottom: 16px;
+}
+
+.comune-search-results {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 20;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.comune-result-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s ease;
+}
+
+.comune-result-item:last-child {
+    border-bottom: none;
+}
+
+.comune-result-item:hover,
+.comune-result-item:focus {
+    background: var(--bg-card-hover);
+}
+
+.comune-result-name {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.comune-result-region {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.comune-search-message {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
 /* List Title Row */
 .list-title-row {
     display: flex;

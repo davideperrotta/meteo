@@ -290,20 +290,17 @@ async function fetchAirQuality(province) {
     }
 }
 
-// Recupera il dettaglio meteo completo (corrente, orario, giornaliero, qualità dell'aria) per una provincia
-async function fetchProvinceDetail(provinceName, hours = 6) {
-    const province = provinces.find(
-        (p) => p.name.toLowerCase() === provinceName.toLowerCase()
-    );
-
-    if (!province) {
-        throw new Error('Provincia non trovata');
+// Recupera il dettaglio meteo completo (corrente, orario, giornaliero, qualità dell'aria)
+// per una qualsiasi località (provincia o comune) identificata da nome/regione/lat/lon.
+async function fetchLocationDetail(location, hours = 6) {
+    if (!location || typeof location.lat !== 'number' || typeof location.lon !== 'number') {
+        throw new Error('Località non valida');
     }
 
     const MAX_HOURLY = 48;
     const hoursToShow = Math.min(Math.max(parseInt(hours, 10) || 6, 1), MAX_HOURLY);
 
-    const cacheKey = province.name.toLowerCase();
+    const cacheKey = `${location.lat.toFixed(4)},${location.lon.toFixed(4)}`;
     const cached = weatherDetailCache.get(cacheKey);
     let baseData;
 
@@ -311,8 +308,8 @@ async function fetchProvinceDetail(provinceName, hours = 6) {
         baseData = cached.data;
     } else {
         const weatherUrl = new URL('https://api.open-meteo.com/v1/forecast');
-        weatherUrl.searchParams.set('latitude', province.lat);
-        weatherUrl.searchParams.set('longitude', province.lon);
+        weatherUrl.searchParams.set('latitude', location.lat);
+        weatherUrl.searchParams.set('longitude', location.lon);
         weatherUrl.searchParams.set('current', 'temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m,wind_direction_10m,pressure_msl');
         weatherUrl.searchParams.set('hourly', 'temperature_2m,weather_code,precipitation_probability');
         weatherUrl.searchParams.set('daily', 'weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,sunrise,sunset');
@@ -324,7 +321,7 @@ async function fetchProvinceDetail(provinceName, hours = 6) {
                 if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
                 return r.json();
             }),
-            fetchAirQuality(province)
+            fetchAirQuality(location)
         ]);
 
         const { current, hourly, daily } = weatherResponse;
@@ -355,8 +352,8 @@ async function fetchProvinceDetail(provinceName, hours = 6) {
         const precipitationProbability = hourly.precipitation_probability[startIndex] ?? 0;
 
         baseData = {
-            name: province.name,
-            region: province.region,
+            name: location.name,
+            region: location.region,
             temperature: Math.round(current.temperature_2m),
             weatherDescription: getWeatherDescription(current.weather_code),
             weatherIcon: getWeatherIcon(current.weather_code),
@@ -383,4 +380,53 @@ async function fetchProvinceDetail(provinceName, hours = 6) {
 
     const { hourlyFull, ...rest } = baseData;
     return { ...rest, hourly: hourlyFull.slice(0, hoursToShow) };
+}
+
+// Wrapper retro-compatibile: recupera il dettaglio di una provincia dal nome (usato da index.html/app.js)
+async function fetchProvinceDetail(provinceName, hours = 6) {
+    const province = provinces.find(
+        (p) => p.name.toLowerCase() === provinceName.toLowerCase()
+    );
+
+    if (!province) {
+        throw new Error('Provincia non trovata');
+    }
+
+    return fetchLocationDetail(province, hours);
+}
+
+// Cerca comuni italiani per nome usando la Geocoding API di Open-Meteo
+const comuneSearchCache = new Map();
+
+async function searchComuni(query) {
+    const term = (query || '').trim();
+    if (term.length < 2) return [];
+
+    const cacheKey = term.toLowerCase();
+    if (comuneSearchCache.has(cacheKey)) {
+        return comuneSearchCache.get(cacheKey);
+    }
+
+    const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
+    url.searchParams.set('name', term);
+    url.searchParams.set('count', '8');
+    url.searchParams.set('language', 'it');
+    url.searchParams.set('countryCode', 'IT');
+
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const results = (data.results || []).map((r) => ({
+        name: r.name,
+        region: r.admin1 || '',
+        province: r.admin2 || '',
+        lat: r.latitude,
+        lon: r.longitude
+    }));
+
+    comuneSearchCache.set(cacheKey, results);
+    return results;
 }
