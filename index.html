@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meteo Italia - Province Italiane</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-list">
+    <div class="phone-frame">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">Meteo Italia</h1>
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="Cerca provincia..."
+                autocomplete="off"
+            >
+        </div>
+
+        <!-- List Title Row -->
+        <div class="list-title-row">
+            <h2 class="list-title">Province Italiane</h2>
+            <span class="list-sort">Alfabetico</span>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Caricamento dati meteo...</p>
+        </div>
+
+        <!-- Province List -->
+        <div id="provinceList" class="province-list">
+            <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <p>Errore nel caricamento dei dati. Riprova più tardi.</p>
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="no-results" style="display: none;">
+            <p>Nessuna provincia trovata.</p>
+        </div>
+    </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

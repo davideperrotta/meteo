@@ -1,0 +1,22 @@
+{
+  "name": "meteo-italia",
+  "version": "1.0.0",
+  "description": "Applicazione di previsioni meteo per le province italiane",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["meteo", "italia", "province"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

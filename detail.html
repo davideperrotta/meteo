@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meteo Italia - Dettaglio Città</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-detail">
+    <div class="phone-frame">
+    <div class="container">
+        <!-- Header -->
+        <div class="detail-header">
+            <button class="back-btn" id="backBtn" aria-label="Indietro">&#8249;</button>
+            <div class="detail-title">
+                <span class="detail-city-name" id="cityName">-</span>
+                <span class="detail-city-region" id="cityRegion">-</span>
+            </div>
+            <span class="settings-btn"></span>
+        </div>
+
+        <!-- Loading / Error -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Caricamento dati meteo...</p>
+        </div>
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <p>Errore nel caricamento dei dati. Riprova più tardi.</p>
+        </div>
+
+        <div id="detailContent" style="display: none;">
+            <!-- Current Weather -->
+            <div class="current-weather-card">
+                <div class="current-temp" id="currentTemp">-</div>
+                <div class="current-weather-right">
+                    <div class="current-icon" id="currentIcon">-</div>
+                    <div class="current-description" id="currentDescription">-</div>
+                    <div class="current-minmax" id="currentMinMax">-</div>
+                </div>
+            </div>
+
+            <!-- Hourly Forecast -->
+            <h2 class="section-title">Previsione Oraria</h2>
+            <div class="hourly-forecast" id="hourlyForecast"></div>
+
+            <!-- 7-day Forecast -->
+            <h2 class="section-title">Previsione Prossimi 7 Giorni</h2>
+            <div class="daily-forecast" id="dailyForecast"></div>
+
+            <!-- Additional Details -->
+            <h2 class="section-title">Dettagli Aggiuntivi</h2>
+            <div class="details-list" id="detailsList"></div>
+        </div>
+    </div>
+    </div>
+
+    <script src="detail.js"></script>
+</body>
+</html>
