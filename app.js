@@ -33,13 +33,7 @@ async function loadWeatherData() {
         noResults.style.display = 'none';
         provinceList.innerHTML = '';
 
-        const response = await fetch('/api/weather');
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        allProvinces = await response.json();
+        allProvinces = await fetchProvinceList();
         filteredProvinces = [...allProvinces];
 
         loadingSpinner.style.display = 'none';
@@ -139,18 +133,6 @@ function formatTemperature(temp) {
         return Math.round(temp);
     }
     return temp;
-}
-
-// Utility: Get Weather Icon by Code
-function getWeatherIcon(code) {
-    if (code === 0 || code === 1) return '☀️';
-    if (code === 2) return '⛅';
-    if (code === 3) return '☁️';
-    if (code === 45 || code === 48) return '🌫️';
-    if (code >= 51 && code <= 67) return '🌧️';
-    if (code >= 71 && code <= 86) return '❄️';
-    if (code >= 95 && code <= 99) return '⛈️';
-    return '❓';
 }
 
 // Refresh Data (optional)

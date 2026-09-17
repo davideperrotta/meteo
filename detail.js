@@ -33,15 +33,7 @@ async function loadCityDetail() {
         // Su schermi desktop mostriamo una fascia oraria più lunga
         const hours = window.innerWidth >= 900 ? 24 : 6;
 
-        const response = await fetch(
-            `/api/weather/${encodeURIComponent(provinceName)}?hours=${hours}`
-        );
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await fetchProvinceDetail(provinceName, hours);
 
         loadingSpinner.style.display = 'none';
         renderDetail(data);
